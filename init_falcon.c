@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2014, The Linux Foundation. All rights reserved.
+   Copyright (c) 2013, The Linux Foundation. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,9 +40,10 @@
 void init_msm_properties(unsigned long msm_id, unsigned long msm_ver, char *board_type)
 {
     char platform[PROP_VALUE_MAX];
-    char radio[PROP_VALUE_MAX];
+    char bootloader[PROP_VALUE_MAX];
     char device[PROP_VALUE_MAX];
     char devicename[PROP_VALUE_MAX];
+    char radio[PROP_VALUE_MAX];
     char cdma_variant[92];
     char fstype[92];
     FILE *fp;
@@ -64,7 +65,14 @@ void init_msm_properties(unsigned long msm_id, unsigned long msm_ver, char *boar
     fgets(fstype, sizeof(fstype), fp);
     pclose(fp);
 
-    property_set("ro.product.model", "Moto G");
+    rc = property_get("ro.board.platform", platform);
+    if (!rc || strncmp(platform, ANDROID_TARGET, PROP_VALUE_MAX))
+        return;
+
+    property_get("ro.bootloader", bootloader);
+
+	property_set("ro.product.model", "Moto G");
+
     if (ISMATCH(radio, "0x1")) {
         if (ISMATCH(fstype, "ext4")) {
             /* xt1032 GPE */
@@ -148,4 +156,5 @@ void init_msm_properties(unsigned long msm_id, unsigned long msm_ver, char *boar
     strlcpy(devicename, device, sizeof(devicename));
     INFO("Found radio id: %s data %s setting build properties for %s device\n", radio, fstype, devicename);
 }
+
 
